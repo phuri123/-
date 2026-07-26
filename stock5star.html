@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ตรา 5 ดาว · ระบบจัดการสต็อก</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Charmonman:wght@400;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<style>
+  :root{
+    --maroon:#7a1220;
+    --maroon-2:#8a1626;
+    --maroon-dark:#5a0e1a;
+    --maroon-darker:#4a0a15;
+    --cream:#fbf6ea;
+    --gold:#f0c419;
+    --gold-2:#e9bd3a;
+    --gold-dark:#c99a1a;
+    --text-dark:#4a1010;
+    --border-gold:#e8c34a;
+    --red-warn:#c0392b;
+    --yellow-warn:#e8b923;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:linear-gradient(180deg,var(--maroon-2),var(--maroon-dark) 40%, var(--maroon-darker));
+    min-height:100vh;
+    font-family:'Prompt',sans-serif;
+    color:#fff8e8;
+    padding-bottom:60px;
+  }
+  .script{font-family:'Charmonman',cursive;}
+  .wrap{max-width:720px;margin:0 auto;padding:22px 18px 40px;}
+  .center{text-align:center;}
+  .logo-mark{position:relative;width:230px;height:150px;margin:0 auto;}
+  .logo-mark .layer-gold{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,#f7d768,var(--gold-2) 60%, var(--gold-dark));
+    clip-path:polygon(50% 2%,60% 10%,67% 4%,75% 13%,82% 9%,90% 20%,96% 30%,100% 46%,100% 86%,92% 96%,8% 96%,0% 86%,0% 46%,4% 30%,10% 20%,18% 9%,25% 13%,33% 4%,40% 10%,50% 2%);
+    filter:drop-shadow(0 8px 14px rgba(0,0,0,.4));
+  }
+  .logo-mark .layer-red{
+    position:absolute;inset:6px;
+    background:radial-gradient(circle at 50% 22%, #e2402a, #8f0f0a 78%);
+    clip-path:polygon(50% 2%,60% 10%,67% 4%,75% 13%,82% 9%,90% 20%,96% 30%,100% 46%,100% 86%,92% 96%,8% 96%,0% 86%,0% 46%,4% 30%,10% 20%,18% 9%,25% 13%,33% 4%,40% 10%,50% 2%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:inset 0 2px 6px rgba(255,255,255,.25);
+  }
+  .logo-mark .logo-text{font-weight:700;font-size:1.7em;color:var(--gold);text-shadow:0 2px 0 #6e0a06;letter-spacing:1px;}
+  .logo-mark .logo-stars{color:var(--gold);letter-spacing:4px;font-size:1em;margin-top:4px;}
+  .logo-mark .reg-mark{
+    position:absolute;top:8px;right:10px;width:20px;height:20px;border-radius:50%;
+    border:1.5px solid var(--gold);color:var(--gold);font-size:.6em;font-weight:700;
+    display:flex;align-items:center;justify-content:center;background:var(--maroon-dark);z-index:2;
+  }
+  .logo-mark.small{width:150px;height:100px;}
+  .logo-mark.small .logo-text{font-size:1.15em;}
+  .logo-mark.small .logo-stars{font-size:.75em;letter-spacing:3px;}
+
+  #splash-screen{
+    position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 50% 30%, var(--maroon-2), var(--maroon-darker) 75%);
+    transition:opacity .8s ease;opacity:1;
+  }
+  #splash-screen.splash-hide{opacity:0;pointer-events:none;}
+  .splash-logo{animation:splashIn .7s cubic-bezier(.2,.8,.3,1) both;}
+  @keyframes splashIn{0%{opacity:0;transform:scale(.72) translateY(10px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+
+  .brand-script{font-size:2.6em;color:var(--gold);margin:14px 0 2px;text-shadow:0 2px 4px rgba(0,0,0,.4);}
+  .subtitle-stars{color:var(--gold);letter-spacing:10px;margin-bottom:6px;}
+  .status-line{font-size:.85em;opacity:.9;margin:2px 0;}
+  .status-line a, .status-line .link{color:var(--gold);text-decoration:underline;cursor:pointer;background:none;border:none;font:inherit;}
+  hr.gold{border:none;border-top:2px solid var(--gold-2);margin:14px 0 18px;opacity:.8;}
+
+  .card{
+    background:var(--cream);
+    color:var(--text-dark);
+    border-radius:18px;
+    border:2px solid var(--gold-2);
+    padding:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+  }
+  label{display:block;font-size:.92em;font-weight:600;margin:12px 0 6px;color:var(--maroon-dark);}
+  input[type=text],input[type=password],input[type=number],input[type=date],select,textarea,input[type=file]{
+    width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid #d8c9a8;
+    background:#fff;font-family:inherit;font-size:1em;color:#333;
+  }
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--gold-dark);}
+  .btn{
+    display:inline-block;border:none;border-radius:14px;padding:13px 18px;
+    font-family:'Prompt',sans-serif;font-weight:600;font-size:.98em;cursor:pointer;
+    text-align:center;transition:transform .08s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-gold{background:linear-gradient(180deg,#f7d768,var(--gold-2));color:#5a3d00;box-shadow:0 3px 0 var(--gold-dark);}
+  .btn-outline{background:var(--maroon-dark);color:var(--gold);border:1.5px solid var(--gold-2);}
+  .btn-outline.active{background:var(--gold-2);color:#5a3d00;}
+  .btn-block{width:100%;}
+  .btn-danger{background:#f3d3d0;color:#a3231b;border:1px solid #e2a39c;padding:8px 14px;border-radius:10px;font-weight:600;}
+  .btn-sm{padding:8px 14px;font-size:.85em;}
+
+  .navgrid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:18px 0 10px;}
+  .navgrid .btn-outline{flex:1 1 30%;min-width:120px;}
+  .toolrow{display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap;}
+  .toolrow .btn{flex:1 1 auto;}
+
+  .section-title{font-size:1.7em;margin:18px 0 6px;color:var(--gold);}
+  .hint{font-size:.85em;opacity:.85;margin-bottom:14px;line-height:1.5;}
+  .empty-box{
+    border:2px dashed var(--gold-2);border-radius:16px;padding:40px 20px;text-align:center;
+    font-family:'Charmonman',cursive;font-size:1.4em;color:#f8e9b8;
+  }
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+  @media (max-width:480px){.grid2{grid-template-columns:1fr;}}
+
+  table{width:100%;border-collapse:collapse;font-size:.88em;}
+  th{background:#f1e2b8;color:var(--maroon-dark);padding:8px 6px;text-align:left;}
+  td{padding:8px 6px;border-bottom:1px solid #ecdfc0;}
+  .row-yellow{background:#fff3c4;}
+  .row-red{background:#f8d0cb;}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.78em;font-weight:600;}
+  .badge-admin{background:#f0c419;color:#5a3d00;}
+  .badge-emp{background:#cfe8d8;color:#1c5b39;}
+
+  .user-card{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .product-card{background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:10px;display:flex;gap:12px;align-items:center;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+  .product-card img{width:48px;height:48px;object-fit:cover;border-radius:8px;background:#eee;flex-shrink:0;}
+  .product-card .pinfo{flex:1;}
+  .product-card .pactions{display:flex;gap:6px;}
+
+  .toast{
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:#2a2a2a;color:#fff;padding:12px 20px;border-radius:12px;font-size:.9em;
+    z-index:999;box-shadow:0 4px 14px rgba(0,0,0,.4);max-width:90%;text-align:center;
+  }
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;
+    z-index:998;padding:20px;
+  }
+  .modal-box{background:var(--cream);border-radius:18px;border:2px solid var(--gold-2);padding:20px;max-width:420px;width:100%;color:var(--text-dark);position:relative;}
+  .modal-close{position:absolute;top:14px;right:16px;font-size:1.4em;background:none;border:none;color:var(--maroon-dark);cursor:pointer;}
+  #scanner-video-wrap{background:#111;border-radius:12px;overflow:hidden;min-height:280px;display:flex;align-items:center;justify-content:center;color:#999;}
+  #scanner-region{width:100%;}
+  .login-error{color:#c0392b;background:#fbe1de;border:1px solid #e2a39c;padding:10px 12px;border-radius:10px;font-size:.88em;margin:12px 0;}
+  .toggle-eye{cursor:pointer;user-select:none;}
+  .pwd-wrap{position:relative;}
+  .pwd-wrap .toggle-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:1.2em;}
+  a.linklike{color:var(--maroon-dark);text-decoration:underline;font-size:.9em;cursor:pointer;background:none;border:none;font-family:inherit;}
+  .field-row{display:flex;gap:10px;}
+  .field-row>div{flex:1;}
+  .small-note{font-size:.78em;color:#8a7550;margin-top:4px;}
+</style>
+</head>
+<body>
+<div id="splash-screen"></div>
+<div id="app"></div>
+<div id="toast-root"></div>
+
+<script>
+/* ---------------- Storage helpers ---------------- */
+async function storeGet(key, shared){
+  try{
+    const r = await window.storage.get(key, !!shared);
+    return r ? JSON.parse(r.value) : null;
+  }catch(e){ return null; }
+}
+async function storeSet(key, value, shared){
+  try{
+    await window.storage.set(key, JSON.stringify(value), !!shared);
+    return true;
+  }catch(e){ console.error('storage set failed', e); return false; }
+}
+
+const K_USERS = 'stock5star-users';
+const K_PRODUCTS = 'stock5star-products';
+const K_HISTORY = 'stock5star-history';
+const K_SESSION = 'stock5star-session';
+const K_GAS_URL = 'stock5star-gas-url';
+
+/* ---------------- Google Sheets (Apps Script) bridge ---------------- */
+let GAS_URL = null;
+let GAS_STATUS = 'unknown'; // unknown | connected | error | off
+
+async function loadGasUrl(){
+  const rec = await storeGet(K_GAS_URL, true);
+  GAS_URL = rec && rec.url ? rec.url : null;
+}
+async function saveGasUrl(url){
+  GAS_URL = url ? url.trim() : null;
+  await storeSet(K_GAS_URL, {url: GAS_URL}, true);
+}
+function normalizeDateStr(v){
+  if(v===undefined || v===null || v==='') return '';
+  if(typeof v === 'number'){
+    const epoch = new Date(Date.UTC(1899,11,30));
+    const d = new Date(epoch.getTime() + v*86400000);
+    return d.toISOString().slice(0,10);
+  }
+  v = String(v);
+  return v.includes('T') ? v.slice(0,10) : v.slice(0,10);
+}
+async function gasFetchSheet(name){
+  if(!GAS_URL) return null;
+  try{
+    const res = await fetch(GAS_URL + (GAS_URL.includes('?')?'&':'?') + 'sheet=' + encodeURIComponent(name) + '&t=' + Date.now());
+    const json = await res.json();
+    if(json && json.ok){ GAS_STATUS='connected'; return json.data; }
+    GAS_STATUS='error';
+    return null;
+  }catch(e){ GAS_STATUS='error'; return null; }
+}
+async function gasPushSheet(name, data){
+  if(!GAS_URL) return false;
+  try{
+    const res = await fetch(GAS_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({sheet:name, data})
+    });
+    const json = await res.json();
+    if(json && json.ok){ GAS_STATUS='connected'; return true; }
+    GAS_STATUS='error';
+    return false;
+  }catch(e){ GAS_STATUS='error'; return false; }
+}
+async function testGasConnection(){
+  if(!GAS_URL){ toast('กรุณาใส่ลิงก์เว็บแอปก่อน'); return; }
+  toast('กำลังทดสอบการเชื่อมต่อ...');
+  const data = await gasFetchSheet('Users');
+  if(data!==null) toast('เชื่อมต่อ Google ชีตสำเร็จ ✅');
+  else toast('เชื่อมต่อไม่สำเร็จ ตรวจสอบลิงก์และการตั้งค่า Deploy อีกครั้ง ❌');
+  render();
+}
+
+/* Unified load/save: Google Sheet is source of truth when connected, local shared storage is cache/fallback */
+async function loadUsers(){
+  if(GAS_URL){
+    const data = await gasFetchSheet('Users');
+    if(data){
+      const norm = data.map(u=>({username:String(u.username||''), password:String(u.password||''), role:u.role==='admin'?'admin':'employee'}));
+      await storeSet(K_USERS, norm, true);
+      return norm;
+    }
+  }
+  return (await storeGet(K_USERS, true)) || [];
+}
+async function saveUsers(users){
+  await storeSet(K_USERS, users, true);
+  if(GAS_URL){ const ok = await gasPushSheet('Users', users); if(!ok) toast('บันทึกในเครื่องแล้ว แต่ส่งไป Google ชีตไม่สำเร็จ'); }
+}
+async function loadProducts(){
+  if(GAS_URL){
+    const data = await gasFetchSheet('Products');
+    if(data){
+      const norm = data.map(p=>({
+        id:String(p.id||''), name:String(p.name||''), category:String(p.category||''),
+        unit:String(p.unit||''),
+        yellowQty: p.yellowQty===''||p.yellowQty===undefined||p.yellowQty===null ? null : Number(p.yellowQty),
+        redQty: p.redQty===''||p.redQty===undefined||p.redQty===null ? null : Number(p.redQty),
+        barcode:String(p.barcode||''), image:p.image||null
+      }));
+      await storeSet(K_PRODUCTS, norm, true);
+      return norm;
+    }
+  }
+  return (await storeGet(K_PRODUCTS, true)) || [];
+}
+async function saveProducts(products){
+  await storeSet(K_PRODUCTS, products, true);
+  if(GAS_URL){ const ok = await gasPushSheet('Products', products); if(!ok) toast('บันทึกในเครื่องแล้ว แต่ส่งไป Google ชีตไม่สำเร็จ'); }
+}
+async function loadHistory(){
+  if(GAS_URL){
+    const data = await gasFetchSheet('History');
+    if(data){
+      const norm = data.map(h=>({
+        id:String(h.id||''), productId:String(h.productId||''),
+        qty:Number(h.qty), diff: h.diff===''||h.diff===undefined||h.diff===null ? null : Number(h.diff),
+        note:String(h.note||''), date: normalizeDateStr(h.date),
+        timestamp: Number(h.timestamp)||0, by:String(h.by||'')
+      }));
+      await storeSet(K_HISTORY, norm, true);
+      return norm;
+    }
+  }
+  return (await storeGet(K_HISTORY, true)) || [];
+}
+async function saveHistory(history){
+  await storeSet(K_HISTORY, history, true);
+  if(GAS_URL){ const ok = await gasPushSheet('History', history); if(!ok) toast('บันทึกในเครื่องแล้ว แต่ส่งไป Google ชีตไม่สำเร็จ'); }
+}
+
+const GAS_CODE = [
+'function doGet(e) {',
+'  var sheetName = e.parameter.sheet;',
+'  var data = readSheet_(sheetName);',
+'  return jsonOut_({ok:true, data:data});',
+'}',
+'',
+'function doPost(e) {',
+'  try {',
+'    var body = JSON.parse(e.postData.contents);',
+'    writeSheet_(body.sheet, body.data);',
+'    return jsonOut_({ok:true});',
+'  } catch (err) {',
+'    return jsonOut_({ok:false, error:String(err)});',
+'  }',
+'}',
+'',
+'function jsonOut_(obj) {',
+'  return ContentService.createTextOutput(JSON.stringify(obj))',
+'    .setMimeType(ContentService.MimeType.JSON);',
+'}',
+'',
+'function getSheet_(name) {',
+'  var ss = SpreadsheetApp.getActiveSpreadsheet();',
+'  var sheet = ss.getSheetByName(name);',
+'  if (!sheet) sheet = ss.insertSheet(name);',
+'  return sheet;',
+'}',
+'',
+'function readSheet_(name) {',
+'  var sheet = getSheet_(name);',
+'  var values = sheet.getDataRange().getValues();',
+'  if (values.length < 2) return [];',
+'  var headers = values[0];',
+'  var rows = [];',
+'  for (var i = 1; i < values.length; i++) {',
+'    var row = values[i];',
+'    var isEmpty = row.every(function(c) { return c === "" || c === null; });',
+'    if (isEmpty) continue;',
+'    var obj = {};',
+'    headers.forEach(function(h, idx) { obj[h] = row[idx]; });',
+'    rows.push(obj);',
+'  }',
+'  return rows;',
+'}',
+'',
+'function writeSheet_(name, data) {',
+'  var sheet = getSheet_(name);',
+'  sheet.clearContents();',
+'  if (!data || data.length === 0) return;',
+'  var headerSet = {};',
+'  data.forEach(function(item) {',
+'    Object.keys(item).forEach(function(k) { headerSet[k] = true; });',
+'  });',
+'  var headers = Object.keys(headerSet);',
+'  var rows = [headers];',
+'  data.forEach(function(item) {',
+'    var row = headers.map(function(h) {',
+'      var v = item[h];',
+'      if (v === undefined || v === null) return "";',
+'      if (typeof v === "object") return JSON.stringify(v);',
+'      return v;',
+'    });',
+'    rows.push(row);',
+'  });',
+'  sheet.getRange(1, 1, rows.length, headers.length).setValues(rows);',
+'}'
+].join('\n');
+
+/* ---------------- State ---------------- */
+let state = {
+  booted:false,
+  view:'login', // login | app
+  tab:'current', // current | count | products | users | summary
+  users:[],
+  products:[],
+  history:[],
+  currentUser:null,
+  loading:true,
+  syncNote:'',
+  loginError:'',
+  loginPwdVisible:false,
+  editingProductId:null,
+  productImageData:null,
+  scannerOpen:false,
+  selectedCategory:'',
+  selectedProductId:'',
+  summaryMonth:'',
+  registerMode:false,
+  gasSetupOpen:false,
+};
+
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+
+function logoMarkHtml(opts){
+  opts = opts || {};
+  const cls = opts.small ? 'logo-mark small' : 'logo-mark';
+  return `<div class="${cls}">
+    <div class="layer-gold"></div>
+    <div class="layer-red">
+      <div class="logo-text">ตรา 5 ดาว</div>
+      <div class="logo-stars">★★★★★</div>
+    </div>
+    ${opts.noReg ? '' : '<div class="reg-mark">®</div>'}
+  </div>`;
+}
+
+function initSplash(){
+  const el = document.getElementById('splash-screen');
+  if(!el) return;
+  el.innerHTML = `<div class="splash-logo">${logoMarkHtml({noReg:true})}</div>`;
+  setTimeout(()=>{
+    el.classList.add('splash-hide');
+    setTimeout(()=>{ el.remove(); }, 850);
+  }, 1300);
+}
+
+function toast(msg, ms){
+  const root = document.getElementById('toast-root');
+  const el = document.createElement('div');
+  el.className='toast';
+  el.textContent = msg;
+  root.appendChild(el);
+  setTimeout(()=>el.remove(), ms||2600);
+}
+
+/* Thai date helpers */
+const THAI_MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const THAI_MONTHS_FULL = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function toThaiDateShort(iso){
+  if(!iso) return '';
+  const d = new Date(iso+'T00:00:00');
+  if(isNaN(d)) return iso;
+  return `${d.getDate()} ${THAI_MONTHS[d.getMonth()]} ${d.getFullYear()+543}`;
+}
+function monthKey(iso){ return iso ? iso.slice(0,7) : ''; }
+function monthLabel(mk){
+  const [y,m] = mk.split('-').map(Number);
+  return `${THAI_MONTHS_FULL[m-1]} ${y+543}`;
+}
+function todayIso(){
+  const d = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+/* ---------------- Boot / load ---------------- */
+async function boot(){
+  render();
+  await loadGasUrl();
+  let [users, products, history, session] = await Promise.all([
+    loadUsers(),
+    loadProducts(),
+    loadHistory(),
+    storeGet(K_SESSION, false),
+  ]);
+  if(!users || !users.length){
+    users = [{username:'admin', password:'admin1234', role:'admin'}];
+    await saveUsers(users);
+  }
+  state.users = users;
+  state.products = products || [];
+  state.history = history || [];
+  state.loading = false;
+  state.booted = true;
+  if(session && session.username && users.find(u=>u.username===session.username)){
+    state.currentUser = users.find(u=>u.username===session.username);
+    state.view = 'app';
+  }
+  render();
+}
+
+async function refreshData(){
+  state.loading = true; render();
+  const [users, products, history] = await Promise.all([
+    loadUsers(),
+    loadProducts(),
+    loadHistory(),
+  ]);
+  if(users) state.users = users;
+  state.products = products || [];
+  state.history = history || [];
+  state.loading = false;
+  if(GAS_URL && GAS_STATUS==='error') toast('รีเฟรชแล้ว แต่เชื่อมต่อ Google ชีตไม่สำเร็จ กำลังใช้ข้อมูลที่บันทึกไว้ล่าสุด');
+  else toast('รีเฟรชข้อมูลเรียบร้อย');
+  render();
+}
+
+/* ---------------- Auth ---------------- */
+async function doLogin(){
+  const u = document.getElementById('login-username').value.trim();
+  const p = document.getElementById('login-password').value;
+  const found = state.users.find(x=>x.username===u && x.password===p);
+  if(!found){
+    state.loginError = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+    render();
+    return;
+  }
+  state.currentUser = found;
+  state.loginError='';
+  state.view='app';
+  await storeSet(K_SESSION, {username:found.username}, false);
+  render();
+}
+async function doLogout(){
+  state.currentUser = null;
+  state.view = 'login';
+  await storeSet(K_SESSION, {username:null}, false);
+  render();
+}
+async function doRegister(){
+  const u = document.getElementById('reg-username').value.trim();
+  const p = document.getElementById('reg-password').value;
+  if(!u || !p){ state.loginError='กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'; render(); return; }
+  if(state.users.find(x=>x.username===u)){ state.loginError='มีชื่อผู้ใช้นี้อยู่แล้ว'; render(); return; }
+  const role = state.users.length===0 ? 'admin' : 'employee';
+  state.users.push({username:u, password:p, role});
+  await saveUsers(state.users);
+  state.registerMode=false;
+  state.loginError='';
+  toast('สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ');
+  render();
+}
+
+/* ---------------- Products ---------------- */
+function getCategories(){
+  const set = new Set(state.products.map(p=>p.category).filter(Boolean));
+  return Array.from(set);
+}
+function currentQtyOf(productId){
+  const entries = state.history.filter(h=>h.productId===productId).sort((a,b)=>a.timestamp-b.timestamp);
+  if(!entries.length) return null;
+  return entries[entries.length-1].qty;
+}
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxW = 300;
+        const scale = Math.min(1, maxW/img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width*scale;
+        canvas.height = img.height*scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+async function onProductImageChange(input){
+  if(input.files && input.files[0]){
+    try{
+      const data = await compressImage(input.files[0]);
+      state.productImageData = data;
+      render();
+    }catch(e){ toast('อ่านรูปภาพไม่สำเร็จ'); }
+  }
+}
+function startEditProduct(id){
+  const p = state.products.find(x=>x.id===id);
+  if(!p) return;
+  state.editingProductId = id;
+  state.productImageData = p.image || null;
+  state.tab='products';
+  render();
+  setTimeout(()=>{
+    document.getElementById('p-name').value = p.name||'';
+    document.getElementById('p-category').value = p.category||'';
+    document.getElementById('p-unit').value = p.unit||'';
+    document.getElementById('p-yellow').value = p.yellowQty ?? '';
+    document.getElementById('p-red').value = p.redQty ?? '';
+    document.getElementById('p-barcode').value = p.barcode||'';
+  },0);
+}
+async function saveProductForm(){
+  const name = document.getElementById('p-name').value.trim();
+  if(!name){ toast('กรุณาใส่ชื่อสินค้า'); return; }
+  const category = document.getElementById('p-category').value.trim();
+  const unit = document.getElementById('p-unit').value.trim();
+  const yellowQty = document.getElementById('p-yellow').value;
+  const redQty = document.getElementById('p-red').value;
+  const barcode = document.getElementById('p-barcode').value.trim();
+  if(state.editingProductId){
+    const p = state.products.find(x=>x.id===state.editingProductId);
+    Object.assign(p, {name, category, unit, yellowQty: yellowQty?Number(yellowQty):null, redQty: redQty?Number(redQty):null, barcode, image: state.productImageData||p.image||null});
+  } else {
+    state.products.push({
+      id: uid(), name, category, unit,
+      yellowQty: yellowQty?Number(yellowQty):null,
+      redQty: redQty?Number(redQty):null,
+      barcode, image: state.productImageData||null
+    });
+  }
+  await saveProducts(state.products);
+  state.editingProductId = null;
+  state.productImageData = null;
+  toast('บันทึกสินค้าเรียบร้อย');
+  render();
+  setTimeout(()=>{
+    ['p-name','p-category','p-unit','p-yellow','p-red','p-barcode'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+  },0);
+}
+async function deleteProduct(id){
+  if(!confirm('ต้องการลบสินค้านี้หรือไม่?')) return;
+  state.products = state.products.filter(p=>p.id!==id);
+  await saveProducts(state.products);
+  toast('ลบสินค้าแล้ว');
+  render();
+}
+function cancelEditProduct(){
+  state.editingProductId = null;
+  state.productImageData = null;
+  render();
+}
+
+/* ---------------- Users ---------------- */
+async function addUserForm(){
+  const u = document.getElementById('u-username').value.trim();
+  const p = document.getElementById('u-password').value;
+  const role = document.getElementById('u-role').value;
+  if(!u || !p){ toast('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'); return; }
+  if(state.users.find(x=>x.username===u)){ toast('มีชื่อผู้ใช้นี้อยู่แล้ว'); return; }
+  state.users.push({username:u, password:p, role});
+  await saveUsers(state.users);
+  toast('เพิ่มผู้ใช้เรียบร้อย');
+  render();
+  setTimeout(()=>{
+    document.getElementById('u-username').value='';
+    document.getElementById('u-password').value='';
+  },0);
+}
+async function deleteUser(username){
+  const admins = state.users.filter(u=>u.role==='admin');
+  const target = state.users.find(u=>u.username===username);
+  if(target && target.role==='admin' && admins.length<=1){
+    toast('ต้องมีแอดมินอย่างน้อย 1 คน'); return;
+  }
+  if(!confirm(`ลบผู้ใช้ "${username}" หรือไม่?`)) return;
+  state.users = state.users.filter(u=>u.username!==username);
+  await saveUsers(state.users);
+  toast('ลบผู้ใช้แล้ว');
+  render();
+}
+
+/* ---------------- Count stock ---------------- */
+async function saveCount(){
+  const productId = document.getElementById('c-product').value;
+  const qtyRaw = document.getElementById('c-qty').value;
+  const date = document.getElementById('c-date').value || todayIso();
+  const note = document.getElementById('c-note').value.trim();
+  if(!productId){ toast('กรุณาเลือกสินค้า'); return; }
+  if(qtyRaw===''){ toast('กรุณาใส่จำนวนที่นับได้'); return; }
+  const qty = Number(qtyRaw);
+  const prevQty = currentQtyOf(productId);
+  const diff = prevQty===null ? null : qty - prevQty;
+  state.history.push({
+    id: uid(), productId, qty, diff, note, date,
+    timestamp: Date.now(),
+    by: state.currentUser ? state.currentUser.username : ''
+  });
+  await saveHistory(state.history);
+  toast('บันทึกยอดนับเรียบร้อย');
+  document.getElementById('c-qty').value='';
+  document.getElementById('c-note').value='';
+  render();
+}
+
+/* ---------------- Barcode scanner ---------------- */
+let html5QrCode = null;
+async function openScanner(){
+  state.scannerOpen = true;
+  render();
+  setTimeout(async ()=>{
+    try{
+      html5QrCode = new Html5Qrcode("scanner-region");
+      await html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 240, height: 160 } },
+        (decodedText)=>{ onBarcodeDetected(decodedText); },
+        ()=>{}
+      );
+    }catch(e){
+      toast('เปิดกล้องไม่สำเร็จ กรุณาอนุญาตการใช้กล้อง หรือกรอกบาร์โค้ดเอง');
+    }
+  }, 100);
+}
+async function closeScanner(){
+  state.scannerOpen = false;
+  if(html5QrCode){
+    try{ await html5QrCode.stop(); html5QrCode.clear(); }catch(e){}
+    html5QrCode = null;
+  }
+  render();
+}
+function onBarcodeDetected(code){
+  const p = state.products.find(x=>x.barcode && x.barcode===code);
+  closeScanner();
+  if(p){
+    state.selectedCategory = p.category||'';
+    state.selectedProductId = p.id;
+    toast('พบสินค้า: '+p.name);
+  } else {
+    toast('ไม่พบสินค้าที่ตรงกับบาร์โค้ดนี้ ('+code+')');
+  }
+  render();
+}
+
+/* ---------------- Excel export ---------------- */
+function exportExcel(){
+  if(typeof XLSX === 'undefined'){ toast('โหลดไลบรารี Excel ไม่สำเร็จ'); return; }
+  const wb = XLSX.utils.book_new();
+  const stockRows = state.products.map(p=>({
+    'ชื่อสินค้า':p.name, 'หมวดหมู่':p.category, 'หน่วยนับ':p.unit,
+    'ยอดปัจจุบัน': currentQtyOf(p.id) ?? '', 'สีเหลืองเมื่อต่ำกว่า':p.yellowQty ?? '',
+    'สีแดงเมื่อต่ำกว่า':p.redQty ?? '', 'บาร์โค้ด':p.barcode||''
+  }));
+  wb.SheetNames.push('สต็อกปัจจุบัน');
+  wb.Sheets['สต็อกปัจจุบัน'] = XLSX.utils.json_to_sheet(stockRows);
+  const histRows = state.history.slice().sort((a,b)=>a.timestamp-b.timestamp).map(h=>{
+    const p = state.products.find(x=>x.id===h.productId);
+    return {'วันที่':toThaiDateShort(h.date), 'สินค้า':p?p.name:'(ลบแล้ว)', 'นับได้':h.qty, 'ผลต่าง':h.diff ?? '', 'หมายเหตุ':h.note||'', 'ผู้บันทึก':h.by||''};
+  });
+  wb.SheetNames.push('ประวัติการนับสต็อก');
+  wb.Sheets['ประวัติการนับสต็อก'] = XLSX.utils.json_to_sheet(histRows);
+  XLSX.writeFile(wb, 'stock5star_'+todayIso()+'.xlsx');
+}
+
+/* ---------------- Monthly summary ---------------- */
+function getMonthOptions(){
+  const set = new Set(state.history.map(h=>monthKey(h.date)));
+  return Array.from(set).sort().reverse();
+}
+function computeSummary(mk){
+  const rows = [];
+  state.products.forEach(p=>{
+    const entries = state.history.filter(h=>h.productId===p.id).sort((a,b)=>a.timestamp-b.timestamp);
+    let usage = 0;
+    entries.forEach(h=>{
+      if(monthKey(h.date)===mk && h.diff!==null && h.diff<0){
+        usage += -h.diff;
+      }
+    });
+    if(entries.some(h=>monthKey(h.date)===mk)){
+      rows.push({name:p.name, unit:p.unit, usage});
+    }
+  });
+  return rows;
+}
+
+/* ---------------- Render ---------------- */
+function render(){
+  const app = document.getElementById('app');
+  if(state.loading && !state.booted){
+    app.innerHTML = renderBootLoading();
+    return;
+  }
+  if(state.view==='login'){
+    app.innerHTML = renderLogin();
+    if(state.gasSetupOpen) document.body.insertAdjacentHTML('beforeend', renderGasSetupModal());
+    return;
+  }
+  app.innerHTML = renderAppShell();
+  if(state.scannerOpen){
+    document.body.insertAdjacentHTML('beforeend', renderScannerModal());
+  }
+  if(state.gasSetupOpen){
+    document.body.insertAdjacentHTML('beforeend', renderGasSetupModal());
+  }
+}
+
+function renderBootLoading(){
+  return `<div class="wrap center">
+    ${logoMarkHtml()}
+    <p style="margin-top:30px;opacity:.8;">กำลังโหลด...</p>
+  </div>`;
+}
+
+function renderLogin(){
+  return `<div class="wrap">
+    <div class="center">
+      ${logoMarkHtml()}
+      <div class="script brand-script">${state.registerMode?'สมัครสมาชิก':'เข้าสู่ระบบ'}</div>
+      <button class="linklike" onclick="openGasSetup()">⚙️ เชื่อมต่อ Google ชีต${GAS_URL?' (ตั้งค่าแล้ว)':''}</button>
+    </div>
+    <div class="card">
+      ${state.registerMode ? `
+        <label>ชื่อผู้ใช้</label>
+        <input type="text" id="reg-username" placeholder="ตั้งชื่อผู้ใช้">
+        <label>รหัสผ่าน</label>
+        <input type="password" id="reg-password" placeholder="ตั้งรหัสผ่าน">
+        ${state.loginError?`<div class="login-error">${state.loginError}</div>`:''}
+        <div style="margin-top:16px;">
+          <button class="btn btn-gold btn-block" onclick="doRegister()">สมัครสมาชิก</button>
+        </div>
+        <div class="center" style="margin-top:14px;">
+          <button class="linklike" onclick="state.registerMode=false; state.loginError=''; render();">มีบัญชีอยู่แล้ว? เข้าสู่ระบบ</button>
+        </div>
+      ` : `
+        <label>ชื่อผู้ใช้</label>
+        <input type="text" id="login-username" placeholder="ชื่อผู้ใช้">
+        <label>รหัสผ่าน</label>
+        <div class="pwd-wrap">
+          <input type="${state.loginPwdVisible?'text':'password'}" id="login-password" placeholder="รหัสผ่าน">
+          <span class="toggle-eye" onclick="state.loginPwdVisible=!state.loginPwdVisible; render(); document.getElementById('login-username').focus();">👁️</span>
+        </div>
+        ${state.loginError?`<div class="login-error">${state.loginError}</div>`:''}
+        <div style="margin-top:16px;">
+          <button class="btn btn-gold btn-block" onclick="doLogin()">เข้าสู่ระบบ</button>
+        </div>
+        <div class="center" style="margin-top:14px;">
+          <button class="linklike" onclick="state.registerMode=true; state.loginError=''; render();">ยังไม่มีบัญชี? สมัครสมาชิก</button>
+        </div>
+      `}
+    </div>
+  </div>`;
+}
+
+function isAdmin(){ return state.currentUser && state.currentUser.role==='admin'; }
+
+function renderAppShell(){
+  const tabs = [
+    {id:'current', icon:'📦', label:'สต็อกปัจจุบัน'},
+    {id:'count', icon:'🧮', label:'นับสต็อก'},
+  ];
+  if(isAdmin()) tabs.push({id:'products', icon:'🗂️', label:'จัดการสินค้า'});
+  if(isAdmin()) tabs.push({id:'users', icon:'👤', label:'ผู้ใช้งาน'});
+  tabs.push({id:'summary', icon:'📊', label:'สรุปรายเดือน'});
+
+  return `<div class="wrap">
+    <div class="center">
+      ${logoMarkHtml()}
+      <div class="script brand-script">กุนเชียง 5 ดาว</div>
+      <div class="subtitle-stars">★ ★ ★ ★ ★</div>
+      <div class="status-line">เชื่อมกับระบบแล้ว · ข้อมูลอัปเดตล่าสุด</div>
+      <div class="status-line">เข้าสู่ระบบ: <strong>${state.currentUser.username}</strong> (${state.currentUser.role==='admin'?'แอดมิน':'พนักงาน'}) · <button class="link" onclick="doLogout()">ออกจากระบบ</button></div>
+    </div>
+    <hr class="gold">
+    <div class="navgrid">
+      ${tabs.map(t=>`<button class="btn btn-outline ${state.tab===t.id?'active':''}" onclick="state.tab='${t.id}'; render();">${t.icon} ${t.label}</button>`).join('')}
+    </div>
+    <div class="toolrow">
+      <button class="btn btn-outline" onclick="refreshData()">↻ รีเฟรชข้อมูล</button>
+      <button class="btn btn-gold" onclick="exportExcel()">⬇️ ส่งออกเป็น Excel</button>
+      ${isAdmin()?`<button class="btn btn-outline" onclick="openGasSetup()">⚙️ Google ชีต</button>`:''}
+    </div>
+    ${renderTab()}
+  </div>`;
+}
+
+function renderTab(){
+  if(state.tab==='current') return renderCurrentStock();
+  if(state.tab==='count') return renderCountStock();
+  if(state.tab==='products' && isAdmin()) return renderManageProducts();
+  if(state.tab==='users' && isAdmin()) return renderManageUsers();
+  if(state.tab==='summary') return renderSummary();
+  return '';
+}
+
+function renderCurrentStock(){
+  if(!state.products.length){
+    return `<div class="script section-title">สต็อกปัจจุบัน</div>
+      <div class="empty-box">ยังไม่มีสินค้า ไปที่แท็บ "จัดการสินค้า" เพื่อเริ่มเพิ่มรายการ</div>`;
+  }
+  const rows = state.products.map(p=>{
+    const qty = currentQtyOf(p.id);
+    let cls = '';
+    if(qty!==null){
+      if(p.redQty!==null && p.redQty!==undefined && qty < p.redQty) cls='row-red';
+      else if(p.yellowQty!==null && p.yellowQty!==undefined && qty < p.yellowQty) cls='row-yellow';
+    }
+    return `<tr class="${cls}"><td>${p.name}</td><td>${p.category||'-'}</td><td>${qty===null?'ยังไม่นับ':qty}</td><td>${p.unit||''}</td></tr>`;
+  }).join('');
+  return `<div class="script section-title">สต็อกปัจจุบัน</div>
+    <div class="card">
+      <table><thead><tr><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือ</th><th>หน่วย</th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>`;
+}
+
+function renderCountStock(){
+  const categories = getCategories();
+  const filteredProducts = state.selectedCategory
+    ? state.products.filter(p=>p.category===state.selectedCategory)
+    : state.products;
+  const history = state.history.slice().sort((a,b)=>b.timestamp-a.timestamp).slice(0,30);
+  return `<div class="script section-title">นับสต็อกวันนี้</div>
+    <button class="btn btn-outline btn-block" style="margin-bottom:14px;" onclick="openScanner()">📷 สแกนบาร์โค้ดหาสินค้า</button>
+    <div class="card">
+      <div class="grid2">
+        <div>
+          <label>หมวดหมู่</label>
+          <select id="c-category" onchange="state.selectedCategory=this.value; state.selectedProductId=''; render();">
+            <option value="">ทั้งหมด</option>
+            ${categories.map(c=>`<option value="${c}" ${state.selectedCategory===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <label>สินค้า</label>
+          <select id="c-product">
+            <option value="">เลือกสินค้า</option>
+            ${filteredProducts.map(p=>`<option value="${p.id}" ${state.selectedProductId===p.id?'selected':''}>${p.name}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div>
+          <label>นับได้ทั้งหมด</label>
+          <input type="number" id="c-qty" placeholder="0">
+        </div>
+        <div>
+          <label>วันที่นับ</label>
+          <input type="date" id="c-date" value="${todayIso()}">
+        </div>
+      </div>
+      <label>หมายเหตุ (ถ้ามี)</label>
+      <textarea id="c-note" rows="2" placeholder="เช่น นับตอนปิดร้าน"></textarea>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn btn-gold" onclick="saveCount()">บันทึกยอดนับ</button>
+      </div>
+    </div>
+    <div class="script section-title">ประวัติการนับสต็อก</div>
+    <div class="card">
+      ${history.length ? `
+      <table><thead><tr><th>วันที่</th><th>สินค้า</th><th>นับได้</th><th>ผลต่าง</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>${history.map(h=>{
+        const p = state.products.find(x=>x.id===h.productId);
+        return `<tr><td>${toThaiDateShort(h.date)}</td><td>${p?p.name:'(ลบแล้ว)'}</td><td>${h.qty}</td><td>${h.diff===null?'-':(h.diff>0?'+':'')+h.diff}</td><td>${h.note||'-'}</td></tr>`;
+      }).join('')}</tbody></table>
+      ` : `<div class="empty-box" style="font-size:1.1em;">ยังไม่มีรายการนับ</div>`}
+    </div>`;
+}
+
+function renderManageProducts(){
+  const editing = state.editingProductId ? state.products.find(p=>p.id===state.editingProductId) : null;
+  return `<div class="script section-title">จัดการรายการสินค้า</div>
+    <div class="card">
+      <label>รูปสินค้า (ไม่บังคับ)</label>
+      <input type="file" accept="image/*" onchange="onProductImageChange(this)">
+      ${state.productImageData?`<img src="${state.productImageData}" style="width:64px;height:64px;object-fit:cover;border-radius:10px;margin-top:8px;">`:''}
+      <div class="grid2">
+        <div><label>ชื่อสินค้า</label><input type="text" id="p-name" placeholder="เช่น กุนเชียงหมู 1 กก."></div>
+        <div><label>หมวดหมู่</label><input type="text" id="p-category" list="cat-list" placeholder="พิมพ์ชื่อหมวดหมู่เอง"><datalist id="cat-list">${getCategories().map(c=>`<option value="${c}">`).join('')}</datalist></div>
+      </div>
+      <div class="grid2">
+        <div><label>หน่วยนับ</label><input type="text" id="p-unit" placeholder="เช่น ถุง, กก., ชิ้น"></div>
+        <div><label>บาร์โค้ด (ไม่บังคับ)</label><input type="text" id="p-barcode" placeholder="สแกนหรือพิมพ์เลขบาร์โค้ด"></div>
+      </div>
+      <div class="grid2">
+        <div><label>สีเหลือง เมื่อต่ำกว่า</label><input type="number" id="p-yellow" placeholder="ของใกล้หมด (ไม่บังคับ)"></div>
+        <div><label>สีแดง เมื่อต่ำกว่า</label><input type="number" id="p-red" placeholder="ควรรีบสั่งของ (ไม่บังคับ)"></div>
+      </div>
+      <div style="margin-top:16px; display:flex; gap:10px; justify-content:flex-end;">
+        ${editing?`<button class="btn btn-outline" onclick="cancelEditProduct()">ยกเลิก</button>`:''}
+        <button class="btn btn-gold" onclick="saveProductForm()">${editing?'บันทึกการแก้ไข':'+ เพิ่มสินค้า'}</button>
+      </div>
+    </div>
+    <div class="script section-title" style="font-size:1.3em;">รายการสินค้าทั้งหมด</div>
+    ${state.products.length ? state.products.map(p=>`
+      <div class="product-card">
+        ${p.image?`<img src="${p.image}">`:`<div style="width:48px;height:48px;background:#eee;border-radius:8px;flex-shrink:0;"></div>`}
+        <div class="pinfo">
+          <div style="font-weight:600;">${p.name}</div>
+          <div style="font-size:.8em;color:#8a7550;">${p.category||'ไม่มีหมวดหมู่'} · ${p.unit||''}</div>
+        </div>
+        <div class="pactions">
+          <button class="btn btn-outline btn-sm" onclick="startEditProduct('${p.id}')">แก้ไข</button>
+          <button class="btn-danger" onclick="deleteProduct('${p.id}')">ลบ</button>
+        </div>
+      </div>
+    `).join('') : `<div class="empty-box">ยังไม่มีสินค้าในระบบ</div>`}
+    `;
+}
+
+function renderManageUsers(){
+  return `<div class="script section-title">จัดการผู้ใช้งาน</div>
+    <div class="hint">แอดมินเพิ่ม/ลบบัญชีพนักงานได้ที่นี่ พนักงานจะมีสิทธิ์แค่ดูสต็อกและนับสต็อก ลบอะไรไม่ได้</div>
+    <div class="card">
+      <div class="grid2">
+        <div><label>ชื่อผู้ใช้</label><input type="text" id="u-username" placeholder="ชื่อผู้ใช้"></div>
+        <div><label>รหัสผ่าน</label><input type="text" id="u-password" placeholder="รหัสผ่าน"></div>
+      </div>
+      <label>สิทธิ์การใช้งาน</label>
+      <select id="u-role">
+        <option value="employee">พนักงาน (นับสต็อกอย่างเดียว)</option>
+        <option value="admin">แอดมิน (สิทธิ์เต็ม)</option>
+      </select>
+      <div style="margin-top:16px; text-align:right;">
+        <button class="btn btn-gold" onclick="addUserForm()">+ เพิ่มผู้ใช้</button>
+      </div>
+    </div>
+    ${state.users.map(u=>`
+      <div class="user-card">
+        <div>
+          <div style="font-weight:600;">${u.username}</div>
+          <span class="badge ${u.role==='admin'?'badge-admin':'badge-emp'}">${u.role==='admin'?'แอดมิน':'พนักงาน'}</span>
+        </div>
+        <button class="btn-danger" onclick="deleteUser('${u.username}')">ลบ</button>
+      </div>
+    `).join('')}
+  `;
+}
+
+function renderSummary(){
+  const months = getMonthOptions();
+  if(!state.summaryMonth && months.length) state.summaryMonth = months[0];
+  const rows = state.summaryMonth ? computeSummary(state.summaryMonth) : [];
+  return `<div class="script section-title">สรุปการใช้สต็อกรายเดือน</div>
+    <div class="hint">คำนวณจากยอดสต็อกที่ลดลงระหว่างการนับแต่ละครั้ง (ไม่ใช่ยอดขายจริง เพราะระบบนี้ไม่มีข้อมูลราคา/ยอดขาย)</div>
+    <div style="margin-bottom:14px;">
+      <label style="display:inline-block;margin:0 10px 0 0;">เลือกเดือน:</label>
+      <select style="width:auto;display:inline-block;" onchange="state.summaryMonth=this.value; render();">
+        ${months.length ? months.map(m=>`<option value="${m}" ${state.summaryMonth===m?'selected':''}>${monthLabel(m)}</option>`).join('') : `<option>ยังไม่มีข้อมูล</option>`}
+      </select>
+    </div>
+    <div class="card">
+      ${rows.length ? `
+        <table><thead><tr><th>สินค้า</th><th>ใช้ไปประมาณ</th><th>หน่วย</th></tr></thead>
+        <tbody>${rows.map(r=>`<tr><td>${r.name}</td><td>${r.usage}</td><td>${r.unit||''}</td></tr>`).join('')}</tbody></table>
+      ` : `<div class="empty-box">ยังไม่มีข้อมูลการนับสต็อกให้สรุป</div>`}
+    </div>`;
+}
+
+function openGasSetup(){ state.gasSetupOpen = true; render(); }
+function closeGasSetup(){ state.gasSetupOpen = false; render(); }
+async function saveGasSetupForm(){
+  const url = document.getElementById('gas-url-input').value.trim();
+  await saveGasUrl(url);
+  if(url){
+    toast('บันทึกลิงก์แล้ว กำลังโหลดข้อมูลจาก Google ชีต...');
+    await refreshData();
+  } else {
+    toast('ยกเลิกการเชื่อมต่อ Google ชีต ใช้ข้อมูลในเครื่องแทน');
+    render();
+  }
+}
+function copyGasCode(){
+  const ta = document.getElementById('gas-code-box');
+  ta.select();
+  ta.setSelectionRange(0, 999999);
+  try{
+    navigator.clipboard.writeText(GAS_CODE).then(()=>toast('คัดลอกโค้ดแล้ว')).catch(()=>toast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วกด Ctrl/Cmd+C เอง'));
+  }catch(e){
+    try{ document.execCommand('copy'); toast('คัดลอกโค้ดแล้ว'); }
+    catch(e2){ toast('คัดลอกไม่สำเร็จ กรุณาเลือกข้อความแล้วกด Ctrl/Cmd+C เอง'); }
+  }
+}
+function renderGasSetupModal(){
+  const statusText = !GAS_URL ? 'ยังไม่ได้เชื่อมต่อ (ใช้ข้อมูลในเครื่อง)'
+    : GAS_STATUS==='connected' ? 'เชื่อมต่อ Google ชีตอยู่ ✅'
+    : GAS_STATUS==='error' ? 'ตั้งค่าไว้แล้ว แต่เชื่อมต่อไม่สำเร็จ ❌'
+    : 'ตั้งค่าไว้แล้ว';
+  return `<div class="modal-overlay" id="gas-overlay">
+    <div class="modal-box" style="max-width:560px;max-height:88vh;overflow-y:auto;">
+      <button class="modal-close" onclick="closeGasSetup()">✕</button>
+      <div class="script" style="font-size:1.6em;margin-bottom:6px;">เชื่อมต่อ Google ชีต</div>
+      <div class="small-note" style="margin-bottom:14px;">สถานะ: ${statusText}</div>
+      <div class="hint" style="margin-bottom:10px;">
+        1) เปิด Google ชีตใหม่ (หรือชีตเดิมที่จะใช้เก็บข้อมูล)<br>
+        2) เมนู ส่วนขยาย (Extensions) → Apps Script<br>
+        3) ลบโค้ดเดิมทั้งหมด แล้ววางโค้ดด้านล่างนี้แทน<br>
+        4) กด Deploy → New deployment → เลือกประเภท "Web app"<br>
+        5) ตั้งค่า Execute as = "Me", Who has access = "Anyone"<br>
+        6) กด Deploy แล้วคัดลอกลิงก์ (URL) ที่ได้มาวางไว้ด้านล่าง
+      </div>
+      <label>โค้ด Apps Script (คัดลอกไปวางในสคริปต์)</label>
+      <textarea id="gas-code-box" readonly rows="6" style="font-family:monospace;font-size:.75em;">${GAS_CODE.replace(/</g,'&lt;')}</textarea>
+      <button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="copyGasCode()">คัดลอกโค้ด</button>
+      <label style="margin-top:18px;">ลิงก์เว็บแอปที่ได้จากการ Deploy</label>
+      <input type="text" id="gas-url-input" placeholder="https://script.google.com/macros/s/xxxxx/exec" value="${GAS_URL||''}">
+      <div class="small-note">เว้นว่างแล้วกดบันทึก หากต้องการเลิกใช้ Google ชีตและกลับไปใช้ข้อมูลในเครื่อง</div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+        <button class="btn btn-outline btn-sm" onclick="testGasConnection()">ทดสอบการเชื่อมต่อ</button>
+        <button class="btn btn-gold btn-sm" onclick="saveGasSetupForm()">บันทึก</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderScannerModal(){
+  return `<div class="modal-overlay" id="scanner-overlay">
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeScanner()">✕</button>
+      <div class="script" style="font-size:1.6em;margin-bottom:10px;">สแกนบาร์โค้ด</div>
+      <div id="scanner-video-wrap"><div id="scanner-region"></div></div>
+      <div class="center" style="margin-top:12px;font-size:.9em;">เล็งกล้องไปที่บาร์โค้ดสินค้า</div>
+    </div>
+  </div>`;
+}
+
+/* remove any stray modal overlays before re-render to avoid duplicates */
+const _origRender = render;
+render = function(){
+  document.querySelectorAll('.modal-overlay').forEach(el=>el.remove());
+  _origRender();
+};
+
+initSplash();
+boot();
+</script>
+</body>
+</html>
