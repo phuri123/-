@@ -1,0 +1,26 @@
+{
+  "name": "นับสต็อกกุนเชียง 5 ดาว",
+  "short_name": "กุนเชียง 5 ดาว",
+  "description": "ระบบนับสต็อกสินค้าร้านกุนเชียง 5 ดาว เชื่อมต่อกับ Google ชีต",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#6E1220",
+  "theme_color": "#6E1220",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
